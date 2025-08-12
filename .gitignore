@@ -1,0 +1,46 @@
+# Database
+DATABASE_URL=sqlite:///data/fpl_optimizer.db
+
+# FPL API
+FPL_API_BASE_URL=https://fantasy.premierleague.com/api/
+
+# Development
+DEBUG=True
+LOG_LEVEL=DEBUG
+EOF
+
+# Create .gitignore
+cat > .gitignore << 'EOF'
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+build/
+dist/
+*.egg-info/
+
+# Virtual environment
+fpl-env/
+
+# Environment variables
+.env
+
+# Data files
+data/raw/*
+data/processed/*
+data/models/*
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# OS
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints
+EOF
