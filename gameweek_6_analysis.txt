@@ -1,0 +1,110 @@
+
+================================================================================
+FPL GAMEWEEK 6 MATCHUP ANALYSIS
+Generated: 2025-09-24T19:11:07.733253
+================================================================================
+
+ANALYSIS PARAMETERS
+----------------------------------------
+Automatically detected next gameweek: 6
+Player filtering: Only consistent starters (45+ avg mins/GW, 2+ starts)
+This analysis focuses on reliable players for the upcoming gameweek.
+
+TOP PICKS BY POSITION
+----------------------------------------
+
+GKP:
+  Roefs (Sunderland) - £4.5m
+    Score: 26.06 | Fixtures: vs Wolves (H), vs Everton (H), @ Nott'm Forest (A)
+  Pope (Newcastle) - £5.0m
+    Score: 25.77 | Fixtures: vs Arsenal (H), vs Nott'm Forest (H), vs Fulham (H)
+  Vicario (Spurs) - £5.1m
+    Score: 21.47 | Fixtures: vs Wolves (H), vs Aston Villa (H), vs Chelsea (H)
+  Henderson (Crystal Palace) - £5.0m
+    Score: 20.98 | Fixtures: vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)
+  A.Becker (Liverpool) - £5.5m
+    Score: 20.61 | Fixtures: vs Man Utd (H), vs Aston Villa (H), @ Crystal Palace (A)
+
+DEF:
+  Chalobah (Chelsea) - £5.2m
+    Score: 33.15 | Fixtures: vs Brighton (H), vs Liverpool (H), vs Sunderland (H)
+  Senesi (Bournemouth) - £4.8m
+    Score: 30.32 | Fixtures: vs Fulham (H), vs Nott'm Forest (H), @ Leeds (A)
+  Guéhi (Crystal Palace) - £4.7m
+    Score: 30.31 | Fixtures: vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)
+  J.Timber (Arsenal) - £5.8m
+    Score: 28.48 | Fixtures: vs West Ham (H), vs Crystal Palace (H), @ Newcastle (A)
+  Mitchell (Crystal Palace) - £5.0m
+    Score: 27.86 | Fixtures: vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)
+
+MID:
+  B.Fernandes (Man Utd) - £9.0m
+    Score: 34.73 | Fixtures: vs Sunderland (H), vs Brighton (H), @ Brentford (A)
+  Anthony (Burnley) - £5.5m
+    Score: 33.91 | Fixtures: vs Leeds (H), vs Arsenal (H), @ Man City (A)
+  Semenyo (Bournemouth) - £7.7m
+    Score: 32.89 | Fixtures: vs Fulham (H), vs Nott'm Forest (H), @ Leeds (A)
+  Enzo (Chelsea) - £6.7m
+    Score: 30.63 | Fixtures: vs Brighton (H), vs Liverpool (H), vs Sunderland (H)
+  Minteh (Brighton) - £5.9m
+    Score: 30.30 | Fixtures: vs Newcastle (H), vs Leeds (H), @ Chelsea (A)
+
+FWD:
+  Haaland (Man City) - £14.3m
+    Score: 39.88 | Fixtures: vs Burnley (H), vs Everton (H), vs Bournemouth (H)
+  Isidor (Sunderland) - £5.5m
+    Score: 32.82 | Fixtures: vs Wolves (H), vs Everton (H), @ Nott'm Forest (A)
+  Richarlison (Spurs) - £6.7m
+    Score: 28.08 | Fixtures: vs Wolves (H), vs Aston Villa (H), vs Chelsea (H)
+  Bowen (West Ham) - £7.7m
+    Score: 27.42 | Fixtures: vs Brentford (H), vs Newcastle (H), @ Everton (A)
+  Mateta (Crystal Palace) - £7.6m
+    Score: 27.22 | Fixtures: vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)
+
+========================================
+OVERALL TOP 10 PICKS
+----------------------------------------
+1. Haaland (FWD) - Man City - £14.3m
+   Score: 39.88
+2. B.Fernandes (MID) - Man Utd - £9.0m
+   Score: 34.73
+3. Anthony (MID) - Burnley - £5.5m
+   Score: 33.91
+4. Chalobah (DEF) - Chelsea - £5.2m
+   Score: 33.15
+5. Semenyo (MID) - Bournemouth - £7.7m
+   Score: 32.89
+6. Isidor (FWD) - Sunderland - £5.5m
+   Score: 32.82
+7. Enzo (MID) - Chelsea - £6.7m
+   Score: 30.63
+8. Senesi (DEF) - Bournemouth - £4.8m
+   Score: 30.32
+9. Guéhi (DEF) - Crystal Palace - £4.7m
+   Score: 30.31
+10. Minteh (MID) - Brighton - £5.9m
+   Score: 30.30
+
+========================================
+DIFFERENTIAL PICKS (<10% ownership)
+----------------------------------------
+• Anthony (Burnley) - 2.5% owned
+  Score: 33.91
+• Isidor (Sunderland) - 1.9% owned
+  Score: 32.82
+• Minteh (Brighton) - 1.2% owned
+  Score: 30.30
+• Ndiaye (Everton) - 9.9% owned
+  Score: 29.35
+• Stach (Leeds) - 1.6% owned
+  Score: 28.67
+
+========================================
+FIXTURE ANALYSIS
+----------------------------------------
+
+Teams with EASIEST fixtures:
+  • Man City: vs Burnley (H), vs Everton (H), vs Bournemouth (H)
+
+Teams with HARDEST fixtures:
+  • Crystal Palace: vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)

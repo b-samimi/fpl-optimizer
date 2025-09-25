@@ -1,0 +1,392 @@
+{
+  "gameweek": 6,
+  "analysis_time": "2025-09-24T19:11:07.733253",
+  "top_picks_by_position": {
+    "GKP": [
+      {
+        "player_name": "Roefs",
+        "team": "Sunderland",
+        "price": 4.5,
+        "form_score": 38.04,
+        "avg_fixture_difficulty": -0.265,
+        "recommendation_score": 26.0565,
+        "upcoming_fixtures": "vs Wolves (H), vs Everton (H), @ Nott'm Forest (A)"
+      },
+      {
+        "player_name": "Pope",
+        "team": "Newcastle",
+        "price": 5.0,
+        "form_score": 38.04,
+        "avg_fixture_difficulty": -0.26349999999999996,
+        "recommendation_score": 25.76695,
+        "upcoming_fixtures": "vs Arsenal (H), vs Nott'm Forest (H), vs Fulham (H)"
+      },
+      {
+        "player_name": "Vicario",
+        "team": "Spurs",
+        "price": 5.1,
+        "form_score": 28.86,
+        "avg_fixture_difficulty": -0.24349999999999997,
+        "recommendation_score": 21.470950000000002,
+        "upcoming_fixtures": "vs Wolves (H), vs Aston Villa (H), vs Chelsea (H)"
+      },
+      {
+        "player_name": "Henderson",
+        "team": "Crystal Palace",
+        "price": 5.0,
+        "form_score": 27.66,
+        "avg_fixture_difficulty": -0.5675000000000001,
+        "recommendation_score": 20.98375,
+        "upcoming_fixtures": "vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)"
+      },
+      {
+        "player_name": "A.Becker",
+        "team": "Liverpool",
+        "price": 5.5,
+        "form_score": 27.779999999999998,
+        "avg_fixture_difficulty": -0.49899999999999994,
+        "recommendation_score": 20.6123,
+        "upcoming_fixtures": "vs Man Utd (H), vs Aston Villa (H), @ Crystal Palace (A)"
+      }
+    ],
+    "DEF": [
+      {
+        "player_name": "Chalobah",
+        "team": "Chelsea",
+        "price": 5.2,
+        "form_score": 56.677570093457945,
+        "avg_fixture_difficulty": -0.32900000000000007,
+        "recommendation_score": 33.15045887850468,
+        "upcoming_fixtures": "vs Brighton (H), vs Liverpool (H), vs Sunderland (H)"
+      },
+      {
+        "player_name": "Senesi",
+        "team": "Bournemouth",
+        "price": 4.8,
+        "form_score": 50.988,
+        "avg_fixture_difficulty": -0.33349999999999996,
+        "recommendation_score": 30.315150000000003,
+        "upcoming_fixtures": "vs Fulham (H), vs Nott'm Forest (H), @ Leeds (A)"
+      },
+      {
+        "player_name": "Gu\u00e9hi",
+        "team": "Crystal Palace",
+        "price": 4.7,
+        "form_score": 53.808,
+        "avg_fixture_difficulty": -0.5675000000000001,
+        "recommendation_score": 30.312950000000004,
+        "upcoming_fixtures": "vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)"
+      },
+      {
+        "player_name": "J.Timber",
+        "team": "Arsenal",
+        "price": 5.8,
+        "form_score": 45.15008797653959,
+        "avg_fixture_difficulty": -0.2385,
+        "recommendation_score": 28.475992521994137,
+        "upcoming_fixtures": "vs West Ham (H), vs Crystal Palace (H), @ Newcastle (A)"
+      },
+      {
+        "player_name": "Mitchell",
+        "team": "Crystal Palace",
+        "price": 5.0,
+        "form_score": 42.576,
+        "avg_fixture_difficulty": -0.5675000000000001,
+        "recommendation_score": 27.86015,
+        "upcoming_fixtures": "vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)"
+      }
+    ],
+    "MID": [
+      {
+        "player_name": "B.Fernandes",
+        "team": "Man Utd",
+        "price": 9.0,
+        "form_score": 64.46792825112107,
+        "avg_fixture_difficulty": -0.472,
+        "recommendation_score": 34.734898654708516,
+        "upcoming_fixtures": "vs Sunderland (H), vs Brighton (H), @ Brentford (A)"
+      },
+      {
+        "player_name": "Anthony",
+        "team": "Burnley",
+        "price": 5.5,
+        "form_score": 57.30738461538462,
+        "avg_fixture_difficulty": -0.476,
+        "recommendation_score": 33.91476923076923,
+        "upcoming_fixtures": "vs Leeds (H), vs Arsenal (H), @ Man City (A)"
+      },
+      {
+        "player_name": "Semenyo",
+        "team": "Bournemouth",
+        "price": 7.7,
+        "form_score": 65.37599999999999,
+        "avg_fixture_difficulty": -0.33349999999999996,
+        "recommendation_score": 32.89035,
+        "upcoming_fixtures": "vs Fulham (H), vs Nott'm Forest (H), @ Leeds (A)"
+      },
+      {
+        "player_name": "Enzo",
+        "team": "Chelsea",
+        "price": 6.7,
+        "form_score": 51.970520547945206,
+        "avg_fixture_difficulty": -0.32900000000000007,
+        "recommendation_score": 30.63238493150685,
+        "upcoming_fixtures": "vs Brighton (H), vs Liverpool (H), vs Sunderland (H)"
+      },
+      {
+        "player_name": "Minteh",
+        "team": "Brighton",
+        "price": 5.9,
+        "form_score": 48.73205811138015,
+        "avg_fixture_difficulty": -0.3939999999999998,
+        "recommendation_score": 30.30062808716707,
+        "upcoming_fixtures": "vs Newcastle (H), vs Leeds (H), @ Chelsea (A)"
+      }
+    ],
+    "FWD": [
+      {
+        "player_name": "Haaland",
+        "team": "Man City",
+        "price": 14.3,
+        "form_score": 80.66558353510895,
+        "avg_fixture_difficulty": 0.004999999999999982,
+        "recommendation_score": 39.88257602905569,
+        "upcoming_fixtures": "vs Burnley (H), vs Everton (H), vs Bournemouth (H)"
+      },
+      {
+        "player_name": "Isidor",
+        "team": "Sunderland",
+        "price": 5.5,
+        "form_score": 52.930723404255325,
+        "avg_fixture_difficulty": -0.265,
+        "recommendation_score": 32.81768297872341,
+        "upcoming_fixtures": "vs Wolves (H), vs Everton (H), @ Nott'm Forest (A)"
+      },
+      {
+        "player_name": "Richarlison",
+        "team": "Spurs",
+        "price": 6.7,
+        "form_score": 45.33987319884726,
+        "avg_fixture_difficulty": -0.24349999999999997,
+        "recommendation_score": 28.07722204610951,
+        "upcoming_fixtures": "vs Wolves (H), vs Aston Villa (H), vs Chelsea (H)"
+      },
+      {
+        "player_name": "Bowen",
+        "team": "West Ham",
+        "price": 7.7,
+        "form_score": 43.16400000000001,
+        "avg_fixture_difficulty": -0.5499999999999999,
+        "recommendation_score": 27.420600000000004,
+        "upcoming_fixtures": "vs Brentford (H), vs Newcastle (H), @ Everton (A)"
+      },
+      {
+        "player_name": "Mateta",
+        "team": "Crystal Palace",
+        "price": 7.6,
+        "form_score": 44.580734693877545,
+        "avg_fixture_difficulty": -0.5675000000000001,
+        "recommendation_score": 27.215105102040816,
+        "upcoming_fixtures": "vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)"
+      }
+    ]
+  },
+  "overall_top_10": [
+    {
+      "player_name": "Haaland",
+      "team": "Man City",
+      "position": "FWD",
+      "price": 14.3,
+      "recommendation_score": 39.88257602905569,
+      "upcoming_fixtures": "vs Burnley (H), vs Everton (H), vs Bournemouth (H)"
+    },
+    {
+      "player_name": "B.Fernandes",
+      "team": "Man Utd",
+      "position": "MID",
+      "price": 9.0,
+      "recommendation_score": 34.734898654708516,
+      "upcoming_fixtures": "vs Sunderland (H), vs Brighton (H), @ Brentford (A)"
+    },
+    {
+      "player_name": "Anthony",
+      "team": "Burnley",
+      "position": "MID",
+      "price": 5.5,
+      "recommendation_score": 33.91476923076923,
+      "upcoming_fixtures": "vs Leeds (H), vs Arsenal (H), @ Man City (A)"
+    },
+    {
+      "player_name": "Chalobah",
+      "team": "Chelsea",
+      "position": "DEF",
+      "price": 5.2,
+      "recommendation_score": 33.15045887850468,
+      "upcoming_fixtures": "vs Brighton (H), vs Liverpool (H), vs Sunderland (H)"
+    },
+    {
+      "player_name": "Semenyo",
+      "team": "Bournemouth",
+      "position": "MID",
+      "price": 7.7,
+      "recommendation_score": 32.89035,
+      "upcoming_fixtures": "vs Fulham (H), vs Nott'm Forest (H), @ Leeds (A)"
+    },
+    {
+      "player_name": "Isidor",
+      "team": "Sunderland",
+      "position": "FWD",
+      "price": 5.5,
+      "recommendation_score": 32.81768297872341,
+      "upcoming_fixtures": "vs Wolves (H), vs Everton (H), @ Nott'm Forest (A)"
+    },
+    {
+      "player_name": "Enzo",
+      "team": "Chelsea",
+      "position": "MID",
+      "price": 6.7,
+      "recommendation_score": 30.63238493150685,
+      "upcoming_fixtures": "vs Brighton (H), vs Liverpool (H), vs Sunderland (H)"
+    },
+    {
+      "player_name": "Senesi",
+      "team": "Bournemouth",
+      "position": "DEF",
+      "price": 4.8,
+      "recommendation_score": 30.315150000000003,
+      "upcoming_fixtures": "vs Fulham (H), vs Nott'm Forest (H), @ Leeds (A)"
+    },
+    {
+      "player_name": "Gu\u00e9hi",
+      "team": "Crystal Palace",
+      "position": "DEF",
+      "price": 4.7,
+      "recommendation_score": 30.312950000000004,
+      "upcoming_fixtures": "vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)"
+    },
+    {
+      "player_name": "Minteh",
+      "team": "Brighton",
+      "position": "MID",
+      "price": 5.9,
+      "recommendation_score": 30.30062808716707,
+      "upcoming_fixtures": "vs Newcastle (H), vs Leeds (H), @ Chelsea (A)"
+    }
+  ],
+  "differential_picks": [
+    {
+      "player_name": "Anthony",
+      "team": "Burnley",
+      "position": "MID",
+      "price": 5.5,
+      "selected_by": 2.5,
+      "form_score": 57.30738461538462,
+      "recommendation_score": 33.91476923076923,
+      "upcoming_fixtures": "vs Leeds (H), vs Arsenal (H), @ Man City (A)"
+    },
+    {
+      "player_name": "Isidor",
+      "team": "Sunderland",
+      "position": "FWD",
+      "price": 5.5,
+      "selected_by": 1.9,
+      "form_score": 52.930723404255325,
+      "recommendation_score": 32.81768297872341,
+      "upcoming_fixtures": "vs Wolves (H), vs Everton (H), @ Nott'm Forest (A)"
+    },
+    {
+      "player_name": "Minteh",
+      "team": "Brighton",
+      "position": "MID",
+      "price": 5.9,
+      "selected_by": 1.2,
+      "form_score": 48.73205811138015,
+      "recommendation_score": 30.30062808716707,
+      "upcoming_fixtures": "vs Newcastle (H), vs Leeds (H), @ Chelsea (A)"
+    },
+    {
+      "player_name": "Ndiaye",
+      "team": "Everton",
+      "position": "MID",
+      "price": 6.5,
+      "selected_by": 9.9,
+      "form_score": 48.0208995215311,
+      "recommendation_score": 29.3528514354067,
+      "upcoming_fixtures": "vs West Ham (H), vs Crystal Palace (H), vs Spurs (H)"
+    },
+    {
+      "player_name": "Stach",
+      "team": "Leeds",
+      "position": "MID",
+      "price": 5.0,
+      "selected_by": 1.6,
+      "form_score": 44.291999999999994,
+      "recommendation_score": 28.6655,
+      "upcoming_fixtures": "vs Bournemouth (H), vs Spurs (H), vs West Ham (H)"
+    },
+    {
+      "player_name": "Gravenberch",
+      "team": "Liverpool",
+      "position": "MID",
+      "price": 5.6,
+      "selected_by": 2.8,
+      "form_score": 44.327999999999996,
+      "recommendation_score": 28.6515,
+      "upcoming_fixtures": "vs Man Utd (H), vs Aston Villa (H), @ Crystal Palace (A)"
+    },
+    {
+      "player_name": "Mitchell",
+      "team": "Crystal Palace",
+      "position": "DEF",
+      "price": 5.0,
+      "selected_by": 2.0,
+      "form_score": 42.576,
+      "recommendation_score": 27.86015,
+      "upcoming_fixtures": "vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)"
+    },
+    {
+      "player_name": "Iwobi",
+      "team": "Fulham",
+      "position": "MID",
+      "price": 6.5,
+      "selected_by": 1.7,
+      "form_score": 41.7345306122449,
+      "recommendation_score": 27.554789795918367,
+      "upcoming_fixtures": "vs Arsenal (H), vs Wolves (H), @ Aston Villa (A)"
+    },
+    {
+      "player_name": "Bowen",
+      "team": "West Ham",
+      "position": "FWD",
+      "price": 7.7,
+      "selected_by": 6.4,
+      "form_score": 43.16400000000001,
+      "recommendation_score": 27.420600000000004,
+      "upcoming_fixtures": "vs Brentford (H), vs Newcastle (H), @ Everton (A)"
+    },
+    {
+      "player_name": "Burn",
+      "team": "Newcastle",
+      "position": "DEF",
+      "price": 5.0,
+      "selected_by": 5.8,
+      "form_score": 41.64,
+      "recommendation_score": 27.276950000000006,
+      "upcoming_fixtures": "vs Arsenal (H), vs Nott'm Forest (H), vs Fulham (H)"
+    }
+  ],
+  "fixture_analysis": {
+    "easiest_fixtures": [
+      {
+        "team": "Man City",
+        "upcoming_fixtures": "vs Burnley (H), vs Everton (H), vs Bournemouth (H)"
+      }
+    ],
+    "hardest_fixtures": [
+      {
+        "team": "Crystal Palace",
+        "upcoming_fixtures": "vs Liverpool (H), vs Bournemouth (H), vs Brentford (H)"
+      }
+    ]
+  }
+}

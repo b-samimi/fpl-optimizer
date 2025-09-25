@@ -1,6 +1,7 @@
 """
 FPL Weekly Matchup Analyzer and Team Optimizer
 This script analyzes player matchups and recommends the best players to pick each gameweek
+Automatically detects the next upcoming gameweek for analysis
 """
 
 import pandas as pd
@@ -9,8 +10,12 @@ from typing import Dict, List, Tuple, Optional
 import logging
 from datetime import datetime, timedelta
 import json
+import sys
+import os
 
-# Import your existing FPL client
+# Add the project root to Python path
+sys.path.insert(0, os.path.abspath('.'))
+
 from src.fpl_optimizer.api.fpl_client import FPLClient
 
 class FPLMatchupAnalyzer:
@@ -30,7 +35,75 @@ class FPLMatchupAnalyzer:
         
         self.BUDGET_LIMIT = 100.0  # £100m budget
         self.SQUAD_SIZE = 15
-        
+    
+    def get_next_gameweek(self) -> int:
+        """Intelligently determine the next gameweek to analyze."""
+        try:
+            gameweeks_df = self.client.get_gameweeks_df()
+            
+            # Convert relevant columns to proper types
+            gameweeks_df['finished'] = gameweeks_df['finished'].astype(bool)
+            gameweeks_df['is_current'] = gameweeks_df['is_current'].astype(bool)
+            gameweeks_df['is_next'] = gameweeks_df['is_next'].astype(bool)
+            
+            # Parse deadline dates for additional context
+            current_time = datetime.now()
+            
+            # Method 1: Check for next gameweek flag
+            next_gw = gameweeks_df[gameweeks_df['is_next'] == True]
+            if not next_gw.empty:
+                gw_num = int(next_gw.iloc[0]['id'])
+                self.logger.info(f"Found next gameweek via is_next flag: GW{gw_num}")
+                return gw_num
+            
+            # Method 2: Find the first unfinished gameweek
+            unfinished_gw = gameweeks_df[gameweeks_df['finished'] == False].sort_values('id')
+            if not unfinished_gw.empty:
+                gw_num = int(unfinished_gw.iloc[0]['id'])
+                self.logger.info(f"Found next gameweek via unfinished games: GW{gw_num}")
+                return gw_num
+            
+            # Method 3: Check current gameweek and add 1
+            current_gw = gameweeks_df[gameweeks_df['is_current'] == True]
+            if not current_gw.empty:
+                current_gw_num = int(current_gw.iloc[0]['id'])
+                # Check if current gameweek is finished
+                if current_gw.iloc[0]['finished']:
+                    next_gw_num = current_gw_num + 1
+                    self.logger.info(f"Current GW{current_gw_num} finished, analyzing next: GW{next_gw_num}")
+                    return next_gw_num
+                else:
+                    self.logger.info(f"Current GW{current_gw_num} still active, analyzing current gameweek")
+                    return current_gw_num
+            
+            # Method 4: Use deadline dates to determine active gameweek
+            for _, gw in gameweeks_df.iterrows():
+                try:
+                    deadline = pd.to_datetime(gw['deadline_time'])
+                    if deadline > current_time and not gw['finished']:
+                        gw_num = int(gw['id'])
+                        self.logger.info(f"Found next gameweek via deadline analysis: GW{gw_num}")
+                        return gw_num
+                except:
+                    continue
+            
+            # Method 5: Fallback - find latest gameweek that exists
+            latest_gw = gameweeks_df.sort_values('id', ascending=False).iloc[0]
+            if not latest_gw['finished']:
+                gw_num = int(latest_gw['id'])
+                self.logger.info(f"Using latest gameweek as fallback: GW{gw_num}")
+                return gw_num
+            
+            # Final fallback - assume we're in early season
+            fallback_gw = min(6, len(gameweeks_df))
+            self.logger.warning(f"All methods failed, using fallback: GW{fallback_gw}")
+            return fallback_gw
+            
+        except Exception as e:
+            self.logger.error(f"Error determining gameweek: {e}")
+            # Emergency fallback to week 6
+            return 6
+    
     def calculate_fixture_difficulty(self, fixtures_df: pd.DataFrame) -> pd.DataFrame:
         """Calculate fixture difficulty rating for each team."""
         # Get team strength from bootstrap data
@@ -77,10 +150,51 @@ class FPLMatchupAnalyzer:
         
         return form_score
     
+    def filter_consistent_players(self, players_df: pd.DataFrame) -> pd.DataFrame:
+        """Filter players to only include those who consistently play (45+ avg minutes over last 4 GWs)."""
+        
+        # Calculate average minutes per gameweek (assuming 4 gameweeks so far)
+        gameweeks_played = 4
+        players_df['avg_minutes_per_gw'] = players_df['minutes'] / gameweeks_played
+        
+        # Filter criteria for consistent players:
+        # 1. At least 45 minutes average per gameweek (significant playing time)
+        # 2. At least 2 starts in total (evidence of being in manager's plans) 
+        # 3. At least 120 total minutes (roughly 1.5 games worth)
+        
+        consistent_players = players_df[
+            (players_df['avg_minutes_per_gw'] >= 45) &
+            (players_df['starts'] >= 2) &
+            (players_df['minutes'] >= 120)
+        ].copy()
+        
+        print(f"Player filtering applied:")
+        print(f"  Original players: {len(players_df)}")
+        print(f"  After filtering: {len(consistent_players)}")
+        print(f"  Removed: {len(players_df) - len(consistent_players)} players with insufficient minutes")
+        
+        # Show some examples of filtered out players for transparency
+        filtered_out = players_df[~players_df['id'].isin(consistent_players['id'])]
+        low_minutes_examples = filtered_out.nsmallest(5, 'minutes')[['web_name', 'team_name', 'minutes', 'starts']]
+        
+        if not low_minutes_examples.empty:
+            print(f"\nExamples of filtered players (low minutes):")
+            for _, player in low_minutes_examples.iterrows():
+                print(f"  {player['web_name']} ({player['team_name']}): {player['minutes']} mins, {player['starts']} starts")
+        
+        return consistent_players
+
     def analyze_upcoming_fixtures(self, gameweek: int, weeks_ahead: int = 5) -> pd.DataFrame:
         """Analyze upcoming fixtures for each team over the next N gameweeks."""
         fixtures_df = self.client.get_fixtures()
         players_df = self.client.get_players_df()
+        teams_df = self.client.get_teams_df()
+        
+        # Apply consistent player filter
+        players_df = self.filter_consistent_players(players_df)
+        
+        # Create team ID to name mapping
+        team_names = {team['id']: team['name'] for _, team in teams_df.iterrows()}
         
         # Filter fixtures for upcoming gameweeks
         upcoming_fixtures = fixtures_df[
@@ -104,7 +218,10 @@ class FPLMatchupAnalyzer:
                 'price': player['price'],
                 'form': player['form'],
                 'total_points': player['total_points'],
-                'selected_by': float(player['selected_by_percent'])
+                'selected_by': float(player['selected_by_percent']),
+                'minutes': player['minutes'],
+                'starts': player['starts'],
+                'avg_minutes_per_gw': player['avg_minutes_per_gw']
             }
             
             # Get team's upcoming fixtures
@@ -117,20 +234,24 @@ class FPLMatchupAnalyzer:
             # Calculate difficulty for home fixtures
             for _, fixture in team_fixtures_home.iterrows():
                 opponent_id = fixture['team_a']
+                opponent_name = team_names.get(opponent_id, f'Team {opponent_id}')
+                
                 if opponent_id in fixture_difficulty:
                     # Lower defensive strength = easier for attackers
                     difficulty = 6 - (fixture_difficulty[opponent_id]['away_defence'] / 200)
                     fixture_scores.append(difficulty)
-                    fixture_opponents.append(f"vs {fixture.get('team_a', 'TBD')} (H)")
+                    fixture_opponents.append(f"vs {opponent_name} (H)")
             
             # Calculate difficulty for away fixtures
             for _, fixture in team_fixtures_away.iterrows():
                 opponent_id = fixture['team_h']
+                opponent_name = team_names.get(opponent_id, f'Team {opponent_id}')
+                
                 if opponent_id in fixture_difficulty:
                     # Away fixtures are generally harder
                     difficulty = 5 - (fixture_difficulty[opponent_id]['home_defence'] / 200)
                     fixture_scores.append(difficulty * 0.85)  # Away penalty
-                    fixture_opponents.append(f"@ {fixture.get('team_h', 'TBD')} (A)")
+                    fixture_opponents.append(f"@ {opponent_name} (A)")
             
             if fixture_scores:
                 player_dict['avg_fixture_difficulty'] = np.mean(fixture_scores)
@@ -318,6 +439,13 @@ class FPLMatchupAnalyzer:
         output.append(f"Generated: {report['analysis_time']}")
         output.append(f"{'='*80}\n")
         
+        # Show gameweek detection and filtering info
+        output.append("ANALYSIS PARAMETERS")
+        output.append("-" * 40)
+        output.append(f"Automatically detected next gameweek: {gameweek}")
+        output.append("Player filtering: Only consistent starters (45+ avg mins/GW, 2+ starts)")
+        output.append("This analysis focuses on reliable players for the upcoming gameweek.\n")
+        
         # Top picks by position
         output.append("TOP PICKS BY POSITION")
         output.append("-" * 40)
@@ -377,12 +505,13 @@ def main():
     # Initialize the analyzer
     analyzer = FPLMatchupAnalyzer()
     
-    # Get current gameweek (you might want to fetch this dynamically)
-    gameweeks_df = analyzer.client.get_gameweeks_df()
-    current_gw = gameweeks_df[gameweeks_df['is_current']].iloc[0] if any(gameweeks_df['is_current']) else gameweeks_df.iloc[0]
-    current_gameweek = int(current_gw['id'])
+    # Automatically detect the next gameweek to analyze
+    current_gameweek = analyzer.get_next_gameweek()
     
-    print(f"Analyzing for Gameweek {current_gameweek}...")
+    print(f"FPL WEEKLY ANALYSIS")
+    print(f"Auto-detected gameweek: {current_gameweek}")
+    print(f"Analysis time: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    print("-" * 50)
     
     # Generate and print the weekly report
     report = analyzer.generate_weekly_report(
@@ -410,7 +539,17 @@ def main():
             print(f"IN:  {transfer['in']['name']} (£{transfer['in']['price']}m)")
             print(f"Net cost: £{transfer['net_cost']:.1f}m | Score improvement: {transfer['score_improvement']:.2f}")
             print()
+    
+    print(f"\nAnalysis complete for Gameweek {current_gameweek}")
+    print(f"Report saved: gameweek_{current_gameweek}_analysis.txt")
+    print(f"JSON data saved: gameweek_{current_gameweek}_analysis.json")
 
 
 if __name__ == "__main__":
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    
     main()
