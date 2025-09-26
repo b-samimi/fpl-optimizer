@@ -17,6 +17,60 @@ class MiniLeagueAnalyzer:
     def __init__(self, fpl_client):
         self.fpl_client = fpl_client
         self.logger = logging.getLogger(__name__)
+
+    def analyze_differentials(self, league_data: Dict) -> pd.DataFrame:
+        """Analyze player ownership differentials within the league."""
+        try:
+            all_players = self.fpl_client.get_players_df()
+        except Exception as e:
+            self.logger.error(f"Error getting players data: {e}")
+            return pd.DataFrame()
+        
+        # Get current teams for all managers
+        manager_teams = []
+        for manager in league_data['managers']:
+            team_data = manager.get('current_team', {})
+            if 'picks' in team_data:
+                picks_df = pd.DataFrame(team_data['picks'])
+                picks_df['manager_name'] = manager['manager_name']
+                picks_df['manager_rank'] = manager['rank']
+                manager_teams.append(picks_df)
+        
+        if not manager_teams:
+            self.logger.warning("No team data found for differential analysis")
+            return pd.DataFrame()
+        
+        # Combine all picks
+        all_picks = pd.concat(manager_teams, ignore_index=True)
+        
+        # Calculate ownership within league
+        league_ownership = all_picks.groupby('element').agg({
+            'manager_name': 'count',
+            'is_captain': 'sum',
+            'is_vice_captain': 'sum'
+        }).reset_index()
+        
+        league_ownership.columns = ['element', 'league_ownership', 'captain_count', 'vice_captain_count']
+        league_ownership['ownership_percentage'] = (league_ownership['league_ownership'] / len(league_data['managers']) * 100)
+        
+        # Merge with player data
+        differential_df = league_ownership.merge(
+            all_players[['id', 'web_name', 'team_short', 'position', 'price', 'selected_by_percent', 'total_points', 'form', 'points_per_game']],
+            left_on='element',
+            right_on='id',
+            how='left'
+        )
+        
+        # Calculate differential score (low league ownership but high global ownership = good differential)
+        differential_df['differential_score'] = (
+            differential_df['selected_by_percent'] / differential_df['ownership_percentage'].clip(lower=1)
+        )
+        
+        # Add value metrics
+        differential_df['value_score'] = differential_df['total_points'] / differential_df['price']
+        differential_df['form_score'] = pd.to_numeric(differential_df['form'], errors='coerce').fillna(0)
+        
+        return differential_df.sort_values('differential_score', ascending=False)
         
     def get_league_detailed_data(self, league_id: int) -> Dict:
         """Get comprehensive league data including all managers and their teams."""
@@ -142,56 +196,6 @@ class MiniLeagueAnalyzer:
         
         return pd.DataFrame(performance_data).sort_values('Current_Rank')
     
-    def get_differential_analysis(self, league_data: Dict) -> pd.DataFrame:
-        """Analyze player ownership differentials within the league."""
-        try:
-            all_players = self.fpl_client.get_players_df()
-        except Exception as e:
-            self.logger.error(f"Error getting players data: {e}")
-            return pd.DataFrame()
-        
-        # Get current teams for all managers
-        manager_teams = []
-        for manager in league_data['managers']:
-            team_data = manager.get('current_team', {})
-            if 'picks' in team_data:
-                picks_df = pd.DataFrame(team_data['picks'])
-                picks_df['manager_name'] = manager['manager_name']
-                picks_df['manager_rank'] = manager['rank']
-                manager_teams.append(picks_df)
-        
-        if not manager_teams:
-            self.logger.warning("No team data found for differential analysis")
-            return pd.DataFrame()
-        
-        # Combine all picks
-        all_picks = pd.concat(manager_teams, ignore_index=True)
-        
-        # Calculate ownership within league
-        league_ownership = all_picks.groupby('element').agg({
-            'manager_name': 'count',
-            'is_captain': 'sum',
-            'is_vice_captain': 'sum'
-        }).reset_index()
-        
-        league_ownership.columns = ['element', 'league_ownership', 'captain_count', 'vice_captain_count']
-        league_ownership['ownership_percentage'] = (league_ownership['league_ownership'] / len(league_data['managers']) * 100)
-        
-        # Merge with player data
-        differential_df = league_ownership.merge(
-            all_players[['id', 'web_name', 'team_short', 'position', 'price', 'selected_by_percent', 'total_points']],
-            left_on='element',
-            right_on='id',
-            how='left'
-        )
-        
-        # Calculate differential score (low league ownership but high global ownership = good differential)
-        differential_df['differential_score'] = (
-            differential_df['selected_by_percent'] / differential_df['ownership_percentage'].clip(lower=1)
-        )
-        
-        return differential_df.sort_values('differential_score', ascending=False)
-    
     def create_league_dashboard(self, league_id: int, save_path: str = None):
         """Create comprehensive league dashboard with multiple visualizations."""
         # Get league data
@@ -266,7 +270,7 @@ class MiniLeagueAnalyzer:
         
         # 5. Captain Choices Analysis
         try:
-            differential_df = self.get_differential_analysis(league_data)
+            differential_df = self.analyze_differentials(league_data)
             if not differential_df.empty and 'captain_count' in differential_df.columns:
                 top_captains = differential_df.nlargest(10, 'captain_count')
                 fig.add_trace(
@@ -314,7 +318,7 @@ class MiniLeagueAnalyzer:
     def get_transfer_recommendations(self, league_data: Dict, your_manager_id: int) -> Dict:
         """Get personalized transfer recommendations based on league analysis."""
         try:
-            differential_df = self.get_differential_analysis(league_data)
+            differential_df = self.analyze_differentials(league_data)
         except Exception as e:
             return {"error": f"Could not analyze differentials: {e}"}
         

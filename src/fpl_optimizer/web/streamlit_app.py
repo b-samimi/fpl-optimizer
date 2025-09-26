@@ -162,19 +162,6 @@ def analyze_league_performance(league_data):
         return None
 
 @st.cache_data(ttl=300)
-def get_differential_analysis(league_data):
-    """Get and cache differential analysis."""
-    if league_data is None:
-        return None
-    try:
-        fpl_client = FPLClient()
-        analyzer = MiniLeagueAnalyzer(fpl_client)
-        return analyzer.analyze_differentials(league_data)
-    except Exception as e:
-        st.error(f"Error with differential analysis: {e}")
-        return None
-
-@st.cache_data(ttl=300)
 def analyze_weekly_transfer_behavior(league_data):
     """Analyze week-over-week transfer patterns and behavior."""
     transfer_behavior = []
@@ -230,6 +217,154 @@ def analyze_weekly_transfer_behavior(league_data):
             })
     
     return pd.DataFrame(transfer_behavior)
+
+@st.cache_data(ttl=300)
+def analyze_monthly_performance(league_data, start_month=None, end_month=None):
+    """Analyze performance by month with date range filtering."""
+    monthly_data = []
+    
+    for manager in league_data['managers']:
+        history = manager.get('history', {})
+        current_gw_history = history.get('current', [])
+        
+        if current_gw_history:
+            df_history = pd.DataFrame(current_gw_history)
+            
+            # Convert deadline_time to datetime if available, otherwise use event number
+            if 'deadline_time' in df_history.columns:
+                df_history['date'] = pd.to_datetime(df_history['deadline_time'])
+                df_history['month'] = df_history['date'].dt.to_period('M')
+            else:
+                # Fallback: estimate months based on gameweek (assuming ~4 GWs per month)
+                df_history['month'] = ((df_history['event'] - 1) // 4) + 1
+                df_history['month_name'] = df_history['month'].apply(
+                    lambda x: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'][x-1] if x <= 10 else f'Month{x}'
+                )
+            
+            # Group by month
+            if 'date' in df_history.columns:
+                monthly_stats = df_history.groupby('month').agg({
+                    'points': ['sum', 'mean', 'std', 'count'],
+                    'event_transfers': 'sum',
+                    'event_transfers_cost': 'sum',
+                    'overall_rank': 'last'
+                }).round(2)
+                
+                monthly_stats.columns = ['Total_Points', 'Avg_Points', 'Points_Std', 'Games_Played', 
+                                       'Total_Transfers', 'Transfer_Cost', 'Final_Rank']
+                
+                for month, stats in monthly_stats.iterrows():
+                    monthly_data.append({
+                        'Manager': manager['manager_name'],
+                        'Month': str(month),
+                        'Total_Points': stats['Total_Points'],
+                        'Avg_Points_Per_GW': stats['Avg_Points'],
+                        'Consistency': 100 - stats['Points_Std'] if stats['Points_Std'] > 0 else 100,
+                        'Games_Played': int(stats['Games_Played']),
+                        'Total_Transfers': int(stats['Total_Transfers']),
+                        'Transfer_Cost': int(stats['Transfer_Cost']),
+                        'Final_Rank': int(stats['Final_Rank']),
+                        'Points_Per_Game': round(stats['Total_Points'] / stats['Games_Played'], 1)
+                    })
+            else:
+                # Fallback monthly grouping
+                monthly_stats = df_history.groupby('month').agg({
+                    'points': ['sum', 'mean', 'count'],
+                    'event_transfers': 'sum'
+                }).round(2)
+                
+                monthly_stats.columns = ['Total_Points', 'Avg_Points', 'Games_Played', 'Total_Transfers']
+                
+                for month, stats in monthly_stats.iterrows():
+                    month_name = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'][month-1] if month <= 10 else f'Month{month}'
+                    monthly_data.append({
+                        'Manager': manager['manager_name'],
+                        'Month': month_name,
+                        'Total_Points': stats['Total_Points'],
+                        'Avg_Points_Per_GW': stats['Avg_Points'],
+                        'Games_Played': int(stats['Games_Played']),
+                        'Total_Transfers': int(stats['Total_Transfers']),
+                        'Points_Per_Game': round(stats['Total_Points'] / stats['Games_Played'], 1)
+                    })
+    
+    return pd.DataFrame(monthly_data) if monthly_data else pd.DataFrame()
+
+@st.cache_data(ttl=300)
+def analyze_weekly_trends(league_data, weeks_back=8):
+    """Analyze recent weekly trends and momentum."""
+    weekly_trends = []
+    
+    for manager in league_data['managers']:
+        history = manager.get('history', {})
+        current_gw_history = history.get('current', [])
+        
+        if current_gw_history:
+            df_history = pd.DataFrame(current_gw_history)
+            
+            # Get recent weeks
+            recent_weeks = df_history.tail(weeks_back)
+            
+            if len(recent_weeks) > 0:
+                # Calculate trends
+                points_trend = recent_weeks['points'].rolling(window=3).mean().iloc[-1] if len(recent_weeks) >= 3 else recent_weeks['points'].mean()
+                rank_change = recent_weeks['overall_rank'].iloc[0] - recent_weeks['overall_rank'].iloc[-1] if len(recent_weeks) > 1 else 0
+                best_week = recent_weeks['points'].max()
+                worst_week = recent_weeks['points'].min()
+                
+                # Form analysis (last 5 gameweeks)
+                last_5 = recent_weeks.tail(5)
+                form_points = last_5['points'].sum()
+                form_avg = last_5['points'].mean()
+                
+                # Momentum calculation
+                if len(recent_weeks) >= 4:
+                    first_half = recent_weeks.head(len(recent_weeks)//2)['points'].mean()
+                    second_half = recent_weeks.tail(len(recent_weeks)//2)['points'].mean()
+                    momentum = second_half - first_half
+                else:
+                    momentum = 0
+                
+                weekly_trends.append({
+                    'Manager': manager['manager_name'],
+                    'Current_Rank': manager['rank'],
+                    'Points_Trend_3GW': round(points_trend, 1),
+                    'Rank_Change': int(rank_change),
+                    'Best_Recent_Week': int(best_week),
+                    'Worst_Recent_Week': int(worst_week),
+                    'Form_Points_5GW': int(form_points),
+                    'Form_Average': round(form_avg, 1),
+                    'Momentum': round(momentum, 1),
+                    'Trending': 'Up' if momentum > 2 else 'Down' if momentum < -2 else 'Stable'
+                })
+    
+    return pd.DataFrame(weekly_trends) if weekly_trends else pd.DataFrame()
+
+@st.cache_data(ttl=300)
+def get_gameweek_comparison(league_data, selected_gameweeks):
+    """Compare specific gameweeks performance."""
+    comparison_data = []
+    
+    for manager in league_data['managers']:
+        history = manager.get('history', {})
+        current_gw_history = history.get('current', [])
+        
+        if current_gw_history:
+            df_history = pd.DataFrame(current_gw_history)
+            
+            for gw in selected_gameweeks:
+                gw_data = df_history[df_history['event'] == gw]
+                if not gw_data.empty:
+                    gw_info = gw_data.iloc[0]
+                    comparison_data.append({
+                        'Manager': manager['manager_name'],
+                        'Gameweek': f"GW{gw}",
+                        'Points': gw_info['points'],
+                        'Rank': gw_info['overall_rank'],
+                        'Transfers': gw_info['event_transfers'],
+                        'Transfer_Cost': gw_info.get('event_transfers_cost', 0)
+                    })
+    
+    return pd.DataFrame(comparison_data) if comparison_data else pd.DataFrame()
 
 def show_enhanced_transfer_analysis(league_data):
     """Show enhanced week-over-week transfer analysis."""
@@ -401,6 +536,223 @@ def show_enhanced_transfer_analysis(league_data):
     
     st.plotly_chart(fig, use_container_width=True)
 
+def show_monthly_weekly_analysis(league_data):
+    """Show comprehensive monthly and weekly analysis."""
+    st.header("📅 Monthly & Weekly Performance Analysis")
+    
+    # Analysis type selector
+    analysis_type = st.selectbox(
+        "Choose Analysis Type:",
+        ["Monthly Performance", "Weekly Trends", "Gameweek Comparison", "Custom Date Range"]
+    )
+    
+    if analysis_type == "Monthly Performance":
+        st.subheader("📊 Monthly Performance Breakdown")
+        
+        with st.spinner("Analyzing monthly performance..."):
+            monthly_df = analyze_monthly_performance(league_data)
+        
+        if not monthly_df.empty:
+            # Monthly performance overview
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Points by month chart
+                avg_monthly = monthly_df.groupby('Month')['Total_Points'].mean().reset_index()
+                fig = px.bar(
+                    avg_monthly,
+                    x='Month',
+                    y='Total_Points',
+                    title="Average Points by Month",
+                    color='Total_Points',
+                    color_continuous_scale='viridis'
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            
+            with col2:
+                # Consistency by month
+                if 'Consistency' in monthly_df.columns:
+                    consistency_monthly = monthly_df.groupby('Month')['Consistency'].mean().reset_index()
+                    fig = px.line(
+                        consistency_monthly,
+                        x='Month',
+                        y='Consistency',
+                        title="Consistency Trends by Month",
+                        markers=True
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    # Alternative chart if consistency not available
+                    avg_ppg = monthly_df.groupby('Month')['Points_Per_Game'].mean().reset_index()
+                    fig = px.line(
+                        avg_ppg,
+                        x='Month',
+                        y='Points_Per_Game',
+                        title="Points Per Game by Month",
+                        markers=True
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+            
+            # Top performers by month
+            st.subheader("🏆 Top Performers by Month")
+            
+            months = monthly_df['Month'].unique()
+            selected_month = st.selectbox("Select Month:", months)
+            
+            month_data = monthly_df[monthly_df['Month'] == selected_month].sort_values('Total_Points', ascending=False)
+            
+            if not month_data.empty:
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.metric("Month Leader", month_data.iloc[0]['Manager'])
+                    st.metric("Points", int(month_data.iloc[0]['Total_Points']))
+                
+                with col2:
+                    if 'Consistency' in month_data.columns:
+                        st.metric("Most Consistent", month_data.sort_values('Consistency', ascending=False).iloc[0]['Manager'])
+                        st.metric("Consistency Score", f"{month_data['Consistency'].max():.1f}")
+                    else:
+                        st.metric("Best PPG", month_data.sort_values('Points_Per_Game', ascending=False).iloc[0]['Manager'])
+                        st.metric("Points Per Game", f"{month_data['Points_Per_Game'].max():.1f}")
+                
+                with col3:
+                    if 'Total_Transfers' in month_data.columns:
+                        st.metric("Most Active", month_data.sort_values('Total_Transfers', ascending=False).iloc[0]['Manager'])
+                        st.metric("Transfers Made", int(month_data['Total_Transfers'].max()))
+                    else:
+                        st.metric("Games Played", int(month_data['Games_Played'].max()))
+                
+                # Monthly leaderboard
+                st.dataframe(month_data, use_container_width=True)
+        else:
+            st.warning("No monthly data available")
+    
+    elif analysis_type == "Weekly Trends":
+        st.subheader("📈 Recent Weekly Trends & Momentum")
+        
+        weeks_back = st.slider("Analyze last N weeks:", 4, 15, 8)
+        
+        with st.spinner("Analyzing weekly trends..."):
+            trends_df = analyze_weekly_trends(league_data, weeks_back)
+        
+        if not trends_df.empty:
+            # Momentum analysis
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Form vs Current Rank
+                fig = px.scatter(
+                    trends_df,
+                    x='Current_Rank',
+                    y='Form_Average',
+                    size='Form_Points_5GW',
+                    color='Trending',
+                    hover_data=['Manager'],
+                    title="Current Form vs League Position",
+                    color_discrete_map={'Up': 'green', 'Down': 'red', 'Stable': 'blue'}
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            
+            with col2:
+                # Rank movement
+                fig = px.bar(
+                    trends_df.sort_values('Rank_Change', ascending=False),
+                    x='Manager',
+                    y='Rank_Change',
+                    title="Rank Movement (Recent Period)",
+                    color='Rank_Change',
+                    color_continuous_scale='RdYlGn'
+                )
+                fig.update_xaxes(tickangle=45)
+                st.plotly_chart(fig, use_container_width=True)
+            
+            # Trending managers
+            st.subheader("🔥 Trending Managers")
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.write("**📈 Trending Up**")
+                trending_up = trends_df[trends_df['Trending'] == 'Up'].sort_values('Momentum', ascending=False)
+                if not trending_up.empty:
+                    for _, manager in trending_up.head(3).iterrows():
+                        st.write(f"🟢 {manager['Manager']} (+{manager['Momentum']:.1f})")
+                else:
+                    st.write("No managers trending up")
+            
+            with col2:
+                st.write("**📉 Trending Down**")
+                trending_down = trends_df[trends_df['Trending'] == 'Down'].sort_values('Momentum')
+                if not trending_down.empty:
+                    for _, manager in trending_down.head(3).iterrows():
+                        st.write(f"🔴 {manager['Manager']} ({manager['Momentum']:.1f})")
+                else:
+                    st.write("No managers trending down")
+            
+            with col3:
+                st.write("**⚖️ Best Form**")
+                best_form = trends_df.sort_values('Form_Average', ascending=False)
+                for _, manager in best_form.head(3).iterrows():
+                    st.write(f"⭐ {manager['Manager']} ({manager['Form_Average']:.1f}/GW)")
+            
+            # Detailed trends table
+            st.subheader("📋 Detailed Weekly Analysis")
+            st.dataframe(trends_df, use_container_width=True)
+        else:
+            st.warning("No weekly trend data available")
+    
+    elif analysis_type == "Gameweek Comparison":
+        st.subheader("⚡ Gameweek Head-to-Head Comparison")
+        
+        # Get available gameweeks
+        sample_manager = league_data['managers'][0] if league_data['managers'] else None
+        if sample_manager and 'history' in sample_manager and 'current' in sample_manager['history']:
+            available_gws = [gw['event'] for gw in sample_manager['history']['current']]
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                gw1 = st.selectbox("Select first gameweek:", available_gws, index=0 if available_gws else 0)
+            with col2:
+                gw2 = st.selectbox("Select second gameweek:", available_gws, index=min(1, len(available_gws)-1))
+            
+            if st.button("Compare Gameweeks"):
+                comparison_df = get_gameweek_comparison(league_data, [gw1, gw2])
+                
+                if not comparison_df.empty:
+                    # Create side-by-side comparison
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.write(f"**GW{gw1} Performance**")
+                        gw1_data = comparison_df[comparison_df['Gameweek'] == f'GW{gw1}'].sort_values('Points', ascending=False)
+                        st.dataframe(gw1_data, use_container_width=True)
+                    
+                    with col2:
+                        st.write(f"**GW{gw2} Performance**")
+                        gw2_data = comparison_df[comparison_df['Gameweek'] == f'GW{gw2}'].sort_values('Points', ascending=False)
+                        st.dataframe(gw2_data, use_container_width=True)
+                    
+                    # Points comparison chart
+                    fig = px.bar(
+                        comparison_df,
+                        x='Manager',
+                        y='Points',
+                        color='Gameweek',
+                        title=f"Points Comparison: GW{gw1} vs GW{gw2}",
+                        barmode='group'
+                    )
+                    fig.update_xaxes(tickangle=45)
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.warning("No comparison data available for selected gameweeks")
+        else:
+            st.warning("No gameweek data available for comparison")
+    
+    elif analysis_type == "Custom Date Range":
+        st.subheader("🗓️ Custom Date Range Analysis")
+        st.info("Feature coming soon - will allow filtering by specific date ranges and custom metrics!")
+
 def main():
     """Main Streamlit application."""
     
@@ -412,9 +764,7 @@ def main():
     
     # Default league IDs (you can modify these)
     default_leagues = {
-        "NBC Sports League": 149533,
-        "@OfficialFPL on X": 31725,
-        "Banterville Pop.6": 4
+        "Banterville Pop.7": 750563
     }
     
     # League selection
@@ -473,7 +823,7 @@ def main():
             st.metric("Created", league_info.get('created', 'Unknown'))
         
         # Tabs for different analyses
-        tab1, tab2, tab3, tab4 = st.tabs(["📈 Performance", "🎯 Differentials", "📊 Standings", "🔄 Transfers"])
+        tab1, tab2, tab3 = st.tabs(["📈 Performance", "📅 Monthly/Weekly", "🔄 Transfers"])
         
         with tab1:
             st.subheader("League Performance Analysis")
@@ -500,27 +850,9 @@ def main():
                     st.warning("No performance data available")
         
         with tab2:
-            st.subheader("Differential Analysis")
-            
-            with st.spinner("Analyzing differentials..."):
-                differential_data = get_differential_analysis(league_data)
-                
-                if differential_data is not None:
-                    st.write("Player ownership and differential opportunities")
-                    # Add your differential visualization here
-                else:
-                    st.warning("No differential data available")
+            show_monthly_weekly_analysis(league_data)
         
         with tab3:
-            st.subheader("Current Standings")
-            
-            if league_data.get('standings'):
-                standings_df = pd.DataFrame(league_data['standings'])
-                st.dataframe(standings_df, use_container_width=True)
-            else:
-                st.warning("No standings data available")
-        
-        with tab4:
             # Enhanced transfer analysis
             show_enhanced_transfer_analysis(league_data)
     
@@ -534,9 +866,8 @@ def main():
         This tool helps you analyze your Fantasy Premier League mini leagues with:
         
         - 📊 **Performance Analysis**: Track manager performance and trends
-        - 🎯 **Differential Analysis**: Find players that can help you climb the rankings  
-        - 📈 **Transfer Insights**: Analyze transfer patterns and efficiency
-        - 🏆 **Head-to-Head Comparisons**: Compare strategies with other managers
+        - 📅 **Monthly/Weekly Analysis**: Understand performance patterns over time
+        - 🔄 **Transfer Insights**: Analyze transfer patterns and efficiency
         
         ### Finding your League ID:
         Go to your mini league page and look at the URL:
