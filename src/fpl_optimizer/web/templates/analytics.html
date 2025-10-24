@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPL Analytics Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>FPL Analytics Dashboard</h1>
+            <p class="subtitle">Comprehensive data analysis for informed FPL decisions</p>
+            <div id="gwInfo" class="gw-info"></div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="overview">Overview</button>
+            <button class="tab-btn" data-tab="team-reliability">Team Reliability</button>
+            <button class="tab-btn" data-tab="differentials">Differentials</button>
+            <button class="tab-btn" data-tab="emerging">Emerging Players</button>
+            <button class="tab-btn" data-tab="shots">Shots Analysis</button>
+            <button class="tab-btn" data-tab="top-players">Top Players</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="overview" class="tab-content active">
+            <div class="card">
+                <h2>Dashboard Overview</h2>
+                <p>Welcome to the FPL Analytics Dashboard! Use the tabs above to explore different analyses:</p>
+
+                <div class="overview-grid">
+                    <div class="overview-card">
+                        <h3>Team Reliability</h3>
+                        <p>Analyze defensive and offensive reliability metrics: xGA, xG, clean sheet rates, and shot volumes.</p>
+                    </div>
+                    <div class="overview-card">
+                        <h3>Differentials</h3>
+                        <p>Find low-ownership players with high potential returns for mini-league advantage.</p>
+                    </div>
+                    <div class="overview-card">
+                        <h3>Emerging Players</h3>
+                        <p>Identify players becoming more integral to their teams before ownership rises.</p>
+                    </div>
+                    <div class="overview-card">
+                        <h3>Shots Analysis</h3>
+                        <p>Comprehensive shots data: shots on goal, team/player shots per 90, and xG by position.</p>
+                    </div>
+                    <div class="overview-card">
+                        <h3>Top Players</h3>
+                        <p>Best performers by position based on form, points, and expected stats.</p>
+                    </div>
+                </div>
+
+                <button id="loadDataBtn" class="btn btn-primary">Load Analytics Data</button>
+            </div>
+        </div>
+
+        <div id="team-reliability" class="tab-content">
+            <div class="card">
+                <h2>Team Reliability Analysis</h2>
+                <p class="help-text">Defensive and offensive reliability metrics for all teams</p>
+
+                <div id="defenseCharts" class="charts-grid"></div>
+                <div id="attackCharts" class="charts-grid"></div>
+                <div id="teamReliabilityTable"></div>
+            </div>
+        </div>
+
+        <div id="differentials" class="tab-content">
+            <div class="card">
+                <h2>Differential Players</h2>
+                <p class="help-text">Low ownership (&lt;15%) players with high potential</p>
+
+                <div id="differentialsChart"></div>
+                <div id="differentialsTable"></div>
+            </div>
+        </div>
+
+        <div id="emerging" class="tab-content">
+            <div class="card">
+                <h2>Emerging FPL Assets</h2>
+                <p class="help-text">Players gaining prominence - get them before ownership rises</p>
+
+                <div id="emergingChart"></div>
+                <div id="emergingTable"></div>
+            </div>
+        </div>
+
+        <div id="shots" class="tab-content">
+            <div class="card">
+                <h2>Shots Analysis</h2>
+                <p class="help-text">Comprehensive analysis of shots, shots on goal, and xG metrics</p>
+
+                <div id="playerShotsChart"></div>
+                <div id="teamShotsChart"></div>
+                <div id="positionShotsChart"></div>
+                <div id="shotsTable"></div>
+            </div>
+        </div>
+
+        <div id="top-players" class="tab-content">
+            <div class="card">
+                <h2>Top Players by Position</h2>
+
+                <div class="position-selector">
+                    <button class="pos-btn active" data-pos="GKP">Goalkeepers</button>
+                    <button class="pos-btn" data-pos="DEF">Defenders</button>
+                    <button class="pos-btn" data-pos="MID">Midfielders</button>
+                    <button class="pos-btn" data-pos="FWD">Forwards</button>
+                </div>
+
+                <div id="topPlayersContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading analytics data...</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPL Transfer Review - Player Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>FPL Transfer Review</h1>
+            <p class="subtitle">Analyze your team and make informed transfer decisions</p>
+        </header>
+
+        <!-- Manager ID Input -->
+        <div class="card">
+            <h2>Your Team</h2>
+            <div class="input-group">
+                <input type="number" id="managerId" placeholder="Enter your FPL Manager ID" value="3692302">
+                <button id="loadTeamBtn" class="btn btn-primary">Load My Team</button>
+            </div>
+            <p class="help-text">Find your Manager ID in your FPL profile URL</p>
+        </div>
+
+        <!-- Team Stats -->
+        <div id="teamStats" class="stats-grid hidden">
+            <div class="stat-card">
+                <h3>Team Value</h3>
+                <p class="stat-value" id="teamValue">-</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Points</h3>
+                <p class="stat-value" id="totalPoints">-</p>
+            </div>
+            <div class="stat-card">
+                <h3>Average Form</h3>
+                <p class="stat-value" id="avgForm">-</p>
+            </div>
+            <div class="stat-card">
+                <h3>Players with Issues</h3>
+                <p class="stat-value" id="playersWithIssues">-</p>
+            </div>
+        </div>
+
+        <!-- Team Display -->
+        <div id="teamDisplay" class="hidden">
+            <div class="card">
+                <div class="section-header">
+                    <h2>Your Squad</h2>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-position="all">All</button>
+                        <button class="filter-btn" data-position="GKP">Goalkeepers</button>
+                        <button class="filter-btn" data-position="DEF">Defenders</button>
+                        <button class="filter-btn" data-position="MID">Midfielders</button>
+                        <button class="filter-btn" data-position="FWD">Forwards</button>
+                    </div>
+                </div>
+                <div id="playersList" class="players-list"></div>
+            </div>
+
+            <!-- Transfer Recommendations -->
+            <div class="card">
+                <h2>Transfer Recommendations</h2>
+                <div id="recommendationsList" class="recommendations-list"></div>
+            </div>
+        </div>
+
+        <!-- Player Search -->
+        <div class="card">
+            <h2>Find Players</h2>
+            <div class="search-controls">
+                <input type="text" id="searchInput" placeholder="Search by name or team..." class="search-input">
+                <select id="positionFilter" class="filter-select">
+                    <option value="">All Positions</option>
+                    <option value="GKP">Goalkeeper</option>
+                    <option value="DEF">Defender</option>
+                    <option value="MID">Midfielder</option>
+                    <option value="FWD">Forward</option>
+                </select>
+                <select id="sortBy" class="filter-select">
+                    <option value="value_score">Best Value</option>
+                    <option value="total_points">Total Points</option>
+                    <option value="form_score">Form</option>
+                    <option value="ppg">Points Per Game</option>
+                    <option value="selected_by">Ownership %</option>
+                </select>
+                <button id="searchBtn" class="btn btn-secondary">Search</button>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <!-- Top Players -->
+        <div class="card">
+            <h2>Top Players</h2>
+            <div class="top-players-controls">
+                <select id="topCategory" class="filter-select">
+                    <option value="value_score">Best Value</option>
+                    <option value="total_points">Total Points</option>
+                    <option value="form_score">In Form</option>
+                    <option value="ppg">Points Per Game</option>
+                </select>
+                <select id="topPosition" class="filter-select">
+                    <option value="">All Positions</option>
+                    <option value="GKP">Goalkeepers</option>
+                    <option value="DEF">Defenders</option>
+                    <option value="MID">Midfielders</option>
+                    <option value="FWD">Forwards</option>
+                </select>
+                <button id="loadTopBtn" class="btn btn-secondary">Load Top Players</button>
+            </div>
+            <div id="topPlayersList" class="top-players-list"></div>
+        </div>
+
+        <!-- Player Details Modal -->
+        <div id="playerModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="playerDetails"></div>
+            </div>
+        </div>
+
+        <!-- Replacements Modal -->
+        <div id="replacementsModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="replacementsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading data...</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

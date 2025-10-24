@@ -112,21 +112,60 @@ class FPLClient:
             self.logger.error(f"Error fetching league {league_id}: {e}")
             raise
     
+    def get_manager_team(self, manager_id: int) -> Dict:
+        """Get manager's team information."""
+        try:
+            response = self.session.get(
+                f"{self.base_url}entry/{manager_id}/",
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Error fetching manager {manager_id} team: {e}")
+            raise
+
+    def get_manager_picks(self, manager_id: int, gameweek: int) -> Dict:
+        """Get manager's picks for a specific gameweek."""
+        try:
+            response = self.session.get(
+                f"{self.base_url}entry/{manager_id}/event/{gameweek}/picks/",
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Error fetching manager {manager_id} picks for GW{gameweek}: {e}")
+            raise
+
+    def get_manager_history(self, manager_id: int) -> Dict:
+        """Get manager's history."""
+        try:
+            response = self.session.get(
+                f"{self.base_url}entry/{manager_id}/history/",
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Error fetching manager {manager_id} history: {e}")
+            raise
+
     def analyze_top_performers(self, metric: str = 'total_points', top_n: int = 10) -> pd.DataFrame:
         """Analyze top performing players by a given metric."""
         players_df = self.get_players_df()
-        
+
         # Filter out players with 0 minutes (haven't played)
         active_players = players_df[players_df['minutes'] > 0].copy()
-        
+
         # Calculate points per million for value analysis
         active_players['points_per_million'] = active_players['total_points'] / active_players['price']
         active_players['points_per_game'] = active_players['total_points'] / (active_players['minutes'] / 90)
-        
+
         # Get top performers
         top_players = active_players.nlargest(top_n, metric)[
-            ['web_name', 'team_name', 'position', 'price', 'total_points', 
+            ['web_name', 'team_name', 'position', 'price', 'total_points',
              'points_per_million', 'goals_scored', 'assists', 'selected_by_percent']
         ]
-        
+
         return top_players.round(2)
